@@ -1,13 +1,17 @@
-import datasets
-
 from lm_eval.base import Task, rf
-from lm_eval.metrics import mean, matthews_corrcoef
+from lm_eval.metrics import mean, matthews_corrcoef, f1_score
+
+from itertools import chain
 
 
-class RussianSuperGlue(Task):
+class DaNetQA(Task):
     VERSION = 0
     DATASET_PATH = "russian_super_glue"
     DATASET_NAME = "danetqa"
+    ANSWERS = {
+        True: [" да", " Да"],
+        False: [" нет", " Нет"],
+    }
 
     def has_training_docs(self):
         return True
@@ -37,25 +41,22 @@ class RussianSuperGlue(Task):
         return doc["passage"] + "\n" + doc["question"]
 
     def construct_requests(self, doc, ctx):
-        return [rf.loglikelihood(ctx, e)[0] for e in [" да", " нет", " Да", " Нет"]]
+        self._chain = list(chain(*self.ANSWERS.values()))
+        return [rf.loglikelihood(ctx, e)[0] for e in self._chain]
 
     def process_results(self, doc, results):
-        d = max(zip([" да", " нет", " Да", " Нет"], results), key=lambda x: x[1])
-        print(d)
-        pred = d[0].lower() == ' да'
+        max_token = max(zip(self._chain, results), key=lambda x: x[1])
+        for k, v in self.ANSWERS.items():
+            if max_token[0] in v:
+                pred = k
+                break
+
         gold = doc["label"]
-        print(gold, pred)
-        return {"mcc": (gold, pred)}
+        print(max_token, gold, pred)
+        return {"mcc": (gold, pred), "f1": (gold, pred), "acc": pred == gold}
 
     def aggregation(self):
-        return {"mcc": matthews_corrcoef}
+        return {"mcc": matthews_corrcoef, "f1": f1_score, "acc": mean}
 
     def higher_is_better(self):
-        return {"mcc": True}
-
-
-# dataset = datasets.load_dataset("russian_super_glue", "danetqa")
-# print(dataset)
-
-# rsg = RussianSuperGlue()
-
+        return {"mcc": True, "f1": True, "acc": True}
