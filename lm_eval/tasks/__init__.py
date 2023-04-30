@@ -87,6 +87,7 @@ all_translation_benchmarks = {
 
 TASK_REGISTRY = {
     "danetqa": rusuperglue.DaNetQA,
+    "parus": rusuperglue.PARus,
     # GLUE
     "cola": glue.CoLA,
     "mnli": glue.MNLI,

@@ -1,3 +1,5 @@
+import numpy as np
+
 from lm_eval.base import Task, rf
 from lm_eval.metrics import mean, matthews_corrcoef, f1_score
 
@@ -53,6 +55,70 @@ class DaNetQA(Task):
 
         gold = doc["label"]
         print(max_token, gold, pred)
+        return {"mcc": (gold, pred), "f1": (gold, pred), "acc": pred == gold}
+
+    def aggregation(self):
+        return {"mcc": matthews_corrcoef, "f1": f1_score, "acc": mean}
+
+    def higher_is_better(self):
+        return {"mcc": True, "f1": True, "acc": True}
+
+
+class PARus(Task):
+    VERSION = 0
+    DATASET_PATH = "russian_super_glue"
+    DATASET_NAME = "parus"
+
+    def has_training_docs(self):
+        return True
+
+    def has_validation_docs(self):
+        return True
+
+    def has_test_docs(self):
+        return False
+
+    def training_docs(self):
+        return self.dataset["train"]
+
+    def validation_docs(self):
+        return self.dataset["validation"]
+
+    def doc_to_text(self, doc):
+        # Drop the period
+        connector = {
+            "cause": "потому что",
+            "effect": "поэтому",
+        }[doc["question"]]
+        return doc["premise"].strip()[:-1] + f", {connector}"
+
+    def doc_to_target(self, doc):
+        correct_choice = doc["choice1"] if doc["label"] == 0 else doc["choice2"]
+        return " " + self.convert_choice(correct_choice)
+
+    def should_decontaminate(self):
+        return True
+
+    def doc_to_decontamination_query(self, doc):
+        return doc["passage"] + "\n" + doc["question"]
+
+    @staticmethod
+    def convert_choice(choice):
+        return choice[0].lower() + choice[1:]
+
+    def construct_requests(self, doc, ctx):
+        choice1 = " " + self.convert_choice(doc["choice1"])
+        choice2 = " " + self.convert_choice(doc["choice2"])
+
+        ll_choice1, _ = rf.loglikelihood(ctx, choice1)
+        ll_choice2, _ = rf.loglikelihood(ctx, choice2)
+
+        return ll_choice1, ll_choice2
+
+    def process_results(self, doc, results):
+        gold = doc["label"]
+        pred = np.argmax(results)
+
         return {"mcc": (gold, pred), "f1": (gold, pred), "acc": pred == gold}
 
     def aggregation(self):
