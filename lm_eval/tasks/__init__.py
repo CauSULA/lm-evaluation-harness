@@ -53,6 +53,7 @@ from . import storycloze
 from . import toxigen
 from . import crowspairs
 from . import bigbench
+from . import rusuperglue
 
 ########################################
 # Translation tasks
@@ -85,6 +86,7 @@ all_translation_benchmarks = {
 
 
 TASK_REGISTRY = {
+    "danetqa": rusuperglue.RussianSuperGlue,
     # GLUE
     "cola": glue.CoLA,
     "mnli": glue.MNLI,
