@@ -54,7 +54,6 @@ class DaNetQA(Task):
                 break
 
         gold = doc["label"]
-        print(max_token, gold, pred)
         return {"mcc": (gold, pred), "f1": (gold, pred), "acc": pred == gold}
 
     def aggregation(self):
@@ -128,7 +127,6 @@ class PARus(Task):
         return {"mcc": True, "f1": True, "acc": True}
 
 
-
 class RWSD(Task):
     VERSION = 0
     DATASET_PATH = "russian_super_glue"
@@ -177,7 +175,6 @@ class RWSD(Task):
                 break
 
         gold = doc["label"]
-        print(max_token, gold, pred)
         return {"mcc": (gold, pred), "f1": (gold, pred), "acc": pred == gold}
 
     def aggregation(self):
