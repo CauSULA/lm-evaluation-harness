@@ -54,6 +54,7 @@ from . import toxigen
 from . import crowspairs
 from . import bigbench
 from . import rusuperglue
+from . import ru_oge
 
 ########################################
 # Translation tasks
@@ -86,6 +87,7 @@ all_translation_benchmarks = {
 
 
 TASK_REGISTRY = {
+    "oge": ru_oge.OGE,
     "danetqa": rusuperglue.DaNetQA,
     "parus": rusuperglue.PARus,
     "rwsd": rusuperglue.RWSD,
