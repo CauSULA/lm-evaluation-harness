@@ -87,7 +87,10 @@ all_translation_benchmarks = {
 
 
 TASK_REGISTRY = {
-    "oge": ru_oge.OGE,
+    "oge_math": ru_oge.OGE_math,
+    "oge_math_yes_no": ru_oge.OGE_math_yes_no,
+    "oge_rus_basis": ru_oge.OGE_rus_basis_yes_no,
+    "oge_rus_phrase_conn": ru_oge.OGE_rus_phrase_conn,
     "danetqa": rusuperglue.DaNetQA,
     "parus": rusuperglue.PARus,
     "rwsd": rusuperglue.RWSD,
